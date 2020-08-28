@@ -1,4 +1,4 @@
-package me.atticuszambrana.kroger.entities;
+package me.atticuszambrana.kroger.entities.response;
 
 public class KrogerAuthenticationResponse {
 	

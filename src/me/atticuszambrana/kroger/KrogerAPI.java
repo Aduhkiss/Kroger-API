@@ -14,7 +14,7 @@ import java.util.StringJoiner;
 
 import com.google.gson.Gson;
 
-import me.atticuszambrana.kroger.entities.KrogerAuthenticationResponse;
+import me.atticuszambrana.kroger.entities.response.KrogerAuthenticationResponse;
 import me.atticuszambrana.kroger.util.EncodingUtil;
 import me.atticuszambrana.kroger.util.StreamUtil;
 
@@ -24,7 +24,6 @@ public class KrogerAPI {
 	
 	private KrogerEnvironment env;
 	private String oneTimeAuthorization;
-	private boolean isAuthenticated;
 	
 	private String AccessToken;
 	
@@ -61,16 +60,12 @@ public class KrogerAPI {
 			KrogerAuthenticationResponse krogerResponse = gson.fromJson(response, KrogerAuthenticationResponse.class);
 			
 			AccessToken = krogerResponse.getAccessToken();
-			isAuthenticated = true;
 		} catch(IOException ex) {
-			isAuthenticated = false;
+			// well fuck...what do we do now?
 		}
 	}
 	
 	public String getProducts(String product) throws IOException {
-		if(!isAuthenticated) {
-			return "KrogerError|NotAuthenticated";
-		}
 		//System.out.println(AccessToken);
 		URL url = new URL(env.getServerAddress() + "products?filter.term=" + product);
 		URLConnection conn = url.openConnection();
@@ -85,10 +80,22 @@ public class KrogerAPI {
 		return response;
 	}
 	
+	public String getProducts(String product, String storeId) throws IOException {
+		//System.out.println(AccessToken);
+		URL url = new URL(env.getServerAddress() + "products?filter.term=" + product + "&filter.locationId=" + storeId);
+		URLConnection conn = url.openConnection();
+		HttpURLConnection http = (HttpURLConnection) conn;
+		http.setRequestMethod("GET");
+		http.setDoOutput(true);
+		http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		http.setRequestProperty("Authorization", "Bearer " + AccessToken);
+		http.setRequestProperty("Cache-Control", "no-cache");
+		http.connect();
+		String response = StreamUtil.convertInputStreamToString(http.getInputStream());
+		return response;
+	}
+	
 	public String getStoresFromZip(String zipCode) throws IOException {
-		if(!isAuthenticated) {
-			return "KrogerError|NotAuthenticated";
-		}
 		URL url = new URL(env.getServerAddress() + "locations?filter.zipCode.near=" + zipCode);
 		URLConnection conn = url.openConnection();
 		HttpURLConnection http = (HttpURLConnection) conn;
