@@ -8,9 +8,12 @@ import me.atticuszambrana.kroger.KrogerEnvironment;
 public class TestMain {
 
 	public static void main(String[] args) throws IOException {
-		KrogerAPI api = new KrogerAPI(KrogerEnvironment.Certification, "cloudy-f3639baeb4530db03ef930eb16073f618847048699047712373", "IdsyGL2jfxU4tEih3eMkd8rUFGxGQg8mwaDx6OEB");
+		KrogerAPI api = new KrogerAPI(KrogerEnvironment.Production, "nah bruh", "you aint gettin this info lol");
 		api.authenticate();
-		System.out.println(api.testProductSearch("Milk"));
+		// dont worry about these comments, just stuff i need to remember lol
+		// 70100659
+		//System.out.println(api.testProductSearch("Milk"));
+		//System.out.println(api.getStoresFromZip("98512"));
 	}
 
 }

@@ -15,6 +15,7 @@ import java.util.StringJoiner;
 import com.google.gson.Gson;
 
 import me.atticuszambrana.kroger.entities.KrogerAuthenticationResponse;
+import me.atticuszambrana.kroger.util.EncodingUtil;
 import me.atticuszambrana.kroger.util.StreamUtil;
 
 public class KrogerAPI {
@@ -35,7 +36,7 @@ public class KrogerAPI {
 	
 	public void authenticate() {
 		try {
-			URL url = new URL(env.getServerAddress() + "/connect/oauth2/token");
+			URL url = new URL(env.getServerAddress() + "/connect/oauth2/token?scope=" + EncodingUtil.encodeURIComponent("product.compact"));
 			URLConnection conn = url.openConnection();
 			HttpURLConnection http = (HttpURLConnection) conn;
 			
@@ -66,11 +67,29 @@ public class KrogerAPI {
 		}
 	}
 	
-	public String testProductSearch(String product) throws IOException {
+	public String getProducts(String product) throws IOException {
 		if(!isAuthenticated) {
 			return "KrogerError|NotAuthenticated";
 		}
-		URL url = new URL(env.getServerAddress() + "products?filter.term=" + product + "&filter.locationId=01400441");
+		//System.out.println(AccessToken);
+		URL url = new URL(env.getServerAddress() + "products?filter.term=" + product);
+		URLConnection conn = url.openConnection();
+		HttpURLConnection http = (HttpURLConnection) conn;
+		http.setRequestMethod("GET");
+		http.setDoOutput(true);
+		http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		http.setRequestProperty("Authorization", "Bearer " + AccessToken);
+		http.setRequestProperty("Cache-Control", "no-cache");
+		http.connect();
+		String response = StreamUtil.convertInputStreamToString(http.getInputStream());
+		return response;
+	}
+	
+	public String getStoresFromZip(String zipCode) throws IOException {
+		if(!isAuthenticated) {
+			return "KrogerError|NotAuthenticated";
+		}
+		URL url = new URL(env.getServerAddress() + "locations?filter.zipCode.near=" + zipCode);
 		URLConnection conn = url.openConnection();
 		HttpURLConnection http = (HttpURLConnection) conn;
 		http.setRequestMethod("GET");
